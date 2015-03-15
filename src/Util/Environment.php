@@ -2,6 +2,11 @@
 
 namespace kilahm\Clio\Util;
 
+type ScreenSize = shape(
+    'width' => int,
+    'height' => int,
+);
+
 class Environment
 {
     /**
@@ -29,5 +34,16 @@ class Environment
             http_response_code(404);
             exit();
         }
+    }
+
+    /**
+     * Get the current screen size
+     */
+    public static function screenSize() : ScreenSize
+    {
+        return shape(
+            'width' => (int)exec('tput cols'),
+            'height' => (int)exec('tput lines'),
+        );
     }
 }

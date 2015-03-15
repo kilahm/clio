@@ -14,8 +14,14 @@ class Clio
      */
     public static function make() : this
     {
+        // Ensure we are using the cli SAPI
         Env::cliOrNotFound();
+
+        // Gather the argument values from the server superglobal
+        // No filtering or sanitizing is performed
         $argv = Env::argvFromServer();
+
+        // Remove the script name from the argument values
         $name = $argv->at(0);
         $argv->removeKey(0);
         return new static(
@@ -50,10 +56,10 @@ class Clio
         return $this;
     }
 
-    public function showHelp(?\Exception $e = null) : void
+    public function showHelp(string $reason) : void
     {
         if($this->customHelp) {
-            throw $e;
+            throw new CliHelp($reason);
         }
         echo 'Help triggered';
         // Figure out how to display help here
