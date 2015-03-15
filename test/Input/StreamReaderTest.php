@@ -10,22 +10,23 @@ class StreamReaderTest extends \HackPack\HackUnit\Core\TestCase
     private array<int,resource> $pipes = [];
     private ?resource $proc = null;
 
-    //<<test>>
-    //public function testReaderNeedsReadableStream() : void
-    //{
-        //$write = fopen('php://temp', 'w');
-        //$read = fopen('php://temp', 'r');
-        //$this->expectCallable(() ==> {
-            //$reader = new StreamReader($write);
-            //$reader->getChar();
-        //})->toThrow(ReadError::class);
-        //$this->expectCallable(() ==> {
-            //$reader = new StreamReader($read);
-            //$reader->getChar();
-        //})->toNotThrow();
-        //fclose($write);
-        //fclose($read);
-    //}
+    <<test>>
+    public function testReaderNeedsReadableStream() : void
+    {
+        $write = fopen('php://temp', 'w');
+        file_put_contents('/tmp/clio.read', 'test string');
+        $read = fopen('/tmp/clio.read', 'r');
+        $this->expectCallable(() ==> {
+            $reader = new StreamReader($write);
+            $reader->getChar();
+        })->toThrow(ReadError::class);
+        $this->expectCallable(() ==> {
+            $reader = new StreamReader($read);
+            $reader->getChar();
+        })->toNotThrow();
+        fclose($write);
+        fclose($read);
+    }
 
     <<test>>
     public function testReaderWaitsForLine() : void
