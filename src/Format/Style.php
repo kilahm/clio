@@ -26,4 +26,13 @@ class Style
     {
         return self::make();
     }
+
+    public static function warn() : StyleGroup
+    {
+        return shape(
+            'fg' => TextColor::yellow,
+            'bg' => BackgroundColor::normal,
+            'effects' => Vector{},
+        );
+    }
 }

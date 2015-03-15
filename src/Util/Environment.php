@@ -14,7 +14,10 @@ class Environment
      */
     public static function argvFromServer() : Vector<string>
     {
-        return Vector::fromItems(filter_input(INPUT_SERVER, 'argv', FILTER_UNSAFE_RAW));
+        self::cliOrNotFound();
+        /* HH_FIXME[2050] filter_input filters out argv */
+        $argv = $_SERVER['argv'];
+        return Vector::fromItems($argv === false ? ['unknown'] : $argv);
     }
 
     /**

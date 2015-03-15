@@ -1,4 +1,4 @@
-<?hh // decl
+<?hh // strict
 
 namespace kilahm\Clio;
 
@@ -14,9 +14,6 @@ class Clio
      */
     public static function make() : this
     {
-        // Ensure we are using the cli SAPI
-        Env::cliOrNotFound();
-
         // Gather the argument values from the server superglobal
         // No filtering or sanitizing is performed
         $argv = Env::argvFromServer();
@@ -28,8 +25,8 @@ class Clio
             $name,
             $argv,
             new Input\StreamReader(STDIN),
-            new Output\StreamWriter(STDOUT),
-            new Output\StreamWriter(STDERR),
+            // the STDOUT constant isn't marked as a writable stream?!
+            new Output\StreamWriter(fopen('php://stdout', 'w')),
             new Util\Parser($argv),
         );
     }
@@ -39,11 +36,17 @@ class Clio
         protected Vector<string> $argv,
         protected Input\Reader $in,
         protected Output\Writer $out,
-        protected Output\Writer $err,
         protected Util\Parser $parser,
     )
     {
-        $parser->on('parseError', inst_meth($this, 'handleParseError'));
+        $parser->on('unknown option', (...) ==> {
+            $name = func_get_arg(0);
+            if(! is_string($name)) {
+                throw new \InvalidArgumentException('Unknown option event must pass the name of the unknown option as a string.');
+            }
+            $this->showHelp('Unknown option: ' . $name);
+            exit();
+        });
     }
 
     /**
@@ -56,13 +59,87 @@ class Clio
         return $this;
     }
 
+    /**
+     * Trigger the built in help (or an exception)
+     * with an optional reason for showing the help
+     */
     public function showHelp(string $reason) : void
     {
         if($this->customHelp) {
-            throw new CliHelp($reason);
+            throw new Exception\CliHelp($reason);
         }
         echo 'Help triggered';
         // Figure out how to display help here
     }
 
+    /**
+     * Wrapper for any particular writer instance used
+     */
+    public function show(string $content) : void
+    {
+        $this->out->write($content);
+    }
+
+    /**
+     * Show the string with a newline appended
+     */
+    public function line(string $content) : void
+    {
+        $this->out->writeln($content);
+    }
+
+    /**
+     * Command line arguments and options
+     */
+    public function arg(string $name) : Args\Argument
+    {
+        $a = $this->parser->arg($name);
+        $a->on('filter error', (...) ==> {
+            $args = Vector::fromItems(func_get_args());
+            $value = $args->get(0);
+            $this->showHelp('"' . $value . '"' . ' is not a valid argument.');
+            exit();
+        });
+
+        $a->on('missing argument', (...) ==> {
+            $arg = func_get_arg(0);
+            if( ! ($arg instanceof Args\Argument)) {
+                throw new \InvalidArgumentException('missing argument event must pass the argument object.');
+            }
+            $this->showHelp('Missing argument "' . $arg->getName() . '"');
+        });
+
+        return $a;
+    }
+
+    public function option(string $name) : Args\Option
+    {
+        $o = $this->parser->option($name);
+        $o->on('filter error', (...) ==> {
+            $args = Vector::fromItems(func_get_args());
+            $value = $args->get(0);
+            $option = $args->get(1);
+            if( ! ($option instanceof Args\Option)) {
+                throw new \InvalidArgumentException('option filter error event must pass the option object.');
+            }
+            $this->showHelp('"' . $value . '"' . ' is not a valid value for ' . $option->getName());
+            exit();
+        });
+
+        $o->on('missing option value', (...) ==> {
+            $option = func_get_arg(0);
+            if( ! ($option instanceof Args\Option)) {
+                throw new \InvalidArgumentException('missing option value event must pass the option object.');
+            }
+            $this->showHelp('Option ' . $option->getName() . ' requires a value.');
+            exit();
+        });
+
+        return $o;
+    }
+
+    public function flag(string $name) : Args\Flag
+    {
+        return $this->parser->flag($name);
+    }
 }
