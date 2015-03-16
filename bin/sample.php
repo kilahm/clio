@@ -12,11 +12,14 @@ function main() : void
     $clio = Clio::make();
     $testText = 'The quick brown fox jumps over the lazy dog';
     $mirror = new ReflectionClass(Style::class);
+    $clio->line('');
     foreach($mirror->getMethods(ReflectionMethod::IS_STATIC | ReflectionMethod::IS_PUBLIC) as $method) {
         if($method->name === 'make') {
             continue;
         }
-        $clio->line(Text::style($testText)->with($method->invoke(null)));
+        $clio->line($method->name . ':');
+        $clio->line(' ' . Text::style($testText)->with($method->invoke(null)));
+        $clio->line('');
     }
 }
 
