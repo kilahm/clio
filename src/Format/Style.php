@@ -30,9 +30,36 @@ class Style
     public static function warn() : StyleGroup
     {
         return shape(
-            'fg' => TextColor::yellow,
-            'bg' => BackgroundColor::normal,
+            'fg' => TextColor::black,
+            'bg' => BackgroundColor::light_yellow,
+            'effects' => Vector{TextEffect::bold},
+        );
+    }
+
+    public static function info() : StyleGroup
+    {
+        return shape(
+            'fg' => TextColor::white,
+            'bg' => BackgroundColor::blue,
             'effects' => Vector{},
+        );
+    }
+
+    public static function error() : StyleGroup
+    {
+        return shape(
+            'fg' => TextColor::white,
+            'bg' => BackgroundColor::red,
+            'effects' => Vector{},
+        );
+    }
+
+    public static function success() : StyleGroup
+    {
+        return shape(
+            'fg' => TextColor::light_green,
+            'bg' => BackgroundColor::normal,
+            'effects' => Vector{TextEffect::bold},
         );
     }
 }
