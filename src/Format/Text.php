@@ -65,6 +65,11 @@ class Text
         return $this;
     }
 
+    public function __toString() : string
+    {
+        return $this->render();
+    }
+
     public function render() : string
     {
         $effectNames = TextEffect::getNames();

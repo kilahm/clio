@@ -22,6 +22,14 @@ class Style
         );
     }
 
+    /**
+     * Remove all formatting control codes
+     */
+    public static function strip(string $in) : string
+    {
+        return $in;
+    }
+
     public static function plain() : StyleGroup
     {
         return self::make();
@@ -60,6 +68,15 @@ class Style
             'fg' => TextColor::light_green,
             'bg' => BackgroundColor::normal,
             'effects' => Vector{TextEffect::bold},
+        );
+    }
+
+    public static function tableHead() : StyleGroup
+    {
+        return shape(
+            'fg' => TextColor::normal,
+            'bg' => BackgroundColor::normal,
+            'effects' => Vector{TextEffect::underline}
         );
     }
 }

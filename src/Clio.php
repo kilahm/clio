@@ -142,4 +142,12 @@ class Clio
     {
         return $this->parser->flag($name);
     }
+
+    /**
+     * Format objects
+     */
+    public function table(Traversable<Traversable<string>> $data) : Format\Table
+    {
+        return Format\Table::make($data);
+    }
 }
