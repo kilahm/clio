@@ -10,6 +10,7 @@ class Table
     protected int $cols = 0;
     protected int $colWidth = 0;
     protected Vector<Vector<string>> $data = Vector{};
+    protected int $maxColWidth = 30;
 
     public static function make(Traversable<Traversable<string>> $data) : this
     {
@@ -25,6 +26,12 @@ class Table
         foreach($data as $row) {
             $this->addRow($row);
         }
+    }
+
+    public function withMaxColWidth(int $width) : this
+    {
+        $this->maxColWidth = $width;
+        return $this;
     }
 
     public function addRow(Traversable<string> $row) : this
@@ -44,8 +51,7 @@ class Table
     {
         $fetcher = $this->screenWidthFetcher;
         $this->colWidth = (int)floor($fetcher() / $this->cols);
-
-        // TODO: play around with min/max column widths
+        $this->colWidth = min($this->colWidth, $this->maxColWidth);
 
         $out = '';
         foreach($this->data as $i => $row) {
@@ -62,18 +68,18 @@ class Table
     public function renderHead(Vector<string> $row) : string
     {
         return
-            str_repeat('-', $this->cols * $this->colWidth) . PHP_EOL .
-            implode('|', $row->map($head ==> Text::style(wordwrap($head, $this->colWidth))->with(Style::tableHead()))) . PHP_EOL .
-            str_repeat('-', $this->cols * $this->colWidth) . PHP_EOL;
+            '+' . str_repeat('-', $this->cols * $this->colWidth - 1) . '+' . PHP_EOL .
+            '|' . implode('|', $row->map($head ==> Text::style($head)->toWidth($this->colWidth - 1))) . '|' . PHP_EOL .
+            '+' . str_repeat('-', $this->cols * $this->colWidth - 1) . '+' . PHP_EOL;
     }
 
     public function renderRow(Vector<string> $row) : string
     {
-        return implode('|', $row->map($item ==> wordwrap($item, $this->colWidth)));
+        return '|' . implode('|', $row->map($item ==> (string)Text::style($item)->toWidth($this->colWidth - 1))) . '|' . PHP_EOL;
     }
 
     public function renderFoot() : string
     {
-        return str_repeat('-', $this->cols * $this->colWidth);
+        return '+' . str_repeat('-', $this->cols * $this->colWidth - 1) . '+' . PHP_EOL;
     }
 }
