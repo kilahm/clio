@@ -17,6 +17,7 @@ type StyleGroup = shape(
 class Text
 {
     private StyleGroup $style;
+    protected int $width = -1;
 
     public static function style(string $text) : this
     {
@@ -30,15 +31,22 @@ class Text
             ->render();
     }
 
-    public function setStyle(StyleGroup $style) : this
+    public function toWidth(int $width) : this
     {
-        $this->style = $style;
+        $this->width = $width;
         return $this;
     }
 
     public function __construct(private string $text = '')
     {
-        $this->style = Style::make();
+        $this->width = mb_strlen($text);
+        $this->style = Style::plain();
+    }
+
+    public function setStyle(StyleGroup $style) : this
+    {
+        $this->style = $style;
+        return $this;
     }
 
     public function fg(TextColor $fg) : this
@@ -90,8 +98,17 @@ class Text
             $offCodes->add($undoEffects[$effectNames[$effect]]);
         }
         if($onCodes->isEmpty()) {
+            return $this->aligned();
+        }
+        return sprintf("\e[%sm%s\e[%sm", implode(';', $onCodes), $this->aligned(), implode(';', $offCodes));
+    }
+
+    public function aligned() : string
+    {
+        if($this->width < 1) {
             return $this->text;
         }
-        return sprintf("\e[%sm%s\e[%sm", implode(';', $onCodes), $this->text, implode(';', $offCodes));
+        return implode(PHP_EOL, Vector::fromItems(explode(PHP_EOL, wordwrap($this->text, $this->width, PHP_EOL, true)))
+            ->map($line ==> str_pad($line, $this->width)));
     }
 }
