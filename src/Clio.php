@@ -91,6 +91,11 @@ class Clio
     /**
      * Command line arguments and options
      */
+    public function allArguments() : Vector<Args\Argument>
+    {
+        return $this->parser->getArguments();
+    }
+
     public function arg(string $name) : Args\Argument
     {
         $a = $this->parser->arg($name);
