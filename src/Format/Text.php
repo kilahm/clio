@@ -18,6 +18,7 @@ class Text
 {
     private StyleGroup $style;
     protected int $width = -1;
+    private int $alignment = STR_PAD_RIGHT;
 
     public static function style(string $text) : this
     {
@@ -73,6 +74,24 @@ class Text
         return $this;
     }
 
+    public function centered() : this
+    {
+        $this->alignment = STR_PAD_BOTH;
+        return $this;
+    }
+
+    public function left() : this
+    {
+        $this->alignment = STR_PAD_RIGHT;
+        return $this;
+    }
+
+    public function right() : this
+    {
+        $this->alignment = STR_PAD_LEFT;
+        return $this;
+    }
+
     public function __toString() : string
     {
         return $this->render();
@@ -109,6 +128,6 @@ class Text
             return $this->text;
         }
         return implode(PHP_EOL, Vector::fromItems(explode(PHP_EOL, wordwrap($this->text, $this->width, PHP_EOL, true)))
-            ->map($line ==> str_pad($line, $this->width)));
+            ->map($line ==> str_pad($line, $this->width, ' ', $this->alignment)));
     }
 }

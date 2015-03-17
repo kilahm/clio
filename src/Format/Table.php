@@ -69,13 +69,13 @@ class Table
     {
         return
             '+' . str_repeat('-', $this->cols * $this->colWidth - 1) . '+' . PHP_EOL .
-            '|' . implode('|', $row->map($head ==> Text::style($head)->toWidth($this->colWidth - 1))) . '|' . PHP_EOL .
+            '|' . implode('|', $row->map($head ==> Text::style($head)->centered()->toWidth($this->colWidth - 1))) . '|' . PHP_EOL .
             '+' . str_repeat('-', $this->cols * $this->colWidth - 1) . '+' . PHP_EOL;
     }
 
     public function renderRow(Vector<string> $row) : string
     {
-        return '|' . implode('|', $row->map($item ==> (string)Text::style($item)->toWidth($this->colWidth - 1))) . '|' . PHP_EOL;
+        return '|' . implode('|', $row->map($item ==> (string)Text::style($item)->centered()->toWidth($this->colWidth - 1))) . '|' . PHP_EOL;
     }
 
     public function renderFoot() : string
