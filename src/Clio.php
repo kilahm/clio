@@ -153,6 +153,6 @@ class Clio
      */
     public function table(Traversable<Traversable<string>> $data) : Format\Table
     {
-        return Format\Table::make($data);
+        return Format\Table::fromStrings($data);
     }
 }

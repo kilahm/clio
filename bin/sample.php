@@ -42,9 +42,10 @@ function show_table(Clio $clio) : void
     $data = Vector{
         Vector{'Head 1', 'Head 2', 'Head 3'},
         Vector{'Row 1', 'Row 1', 'Row 1'},
-        Vector{'Row 2', 'Row 2', 'Row 2'},
+        Vector{'Row 2', 'Random really long text that should go to the next line.  This shows you how the table adapts to its content.', 'Row 2'},
         Vector{'Row 3', 'Row 3', 'Row 3'},
     };
 
     $clio->show($clio->table($data)->render());
+    $clio->show($clio->table($data)->withMaxColWidth(4)->render());
 }

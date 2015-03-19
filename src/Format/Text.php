@@ -99,6 +99,11 @@ class Text
 
     public function render() : string
     {
+        return $this->applyStyleTo($this->aligned());
+    }
+
+    public function applyStyleTo(string $content) : string
+    {
         $effectNames = TextEffect::getNames();
         $undoEffects = UndoEffect::getValues();
 
@@ -117,9 +122,9 @@ class Text
             $offCodes->add($undoEffects[$effectNames[$effect]]);
         }
         if($onCodes->isEmpty()) {
-            return $this->aligned();
+            return $content;
         }
-        return sprintf("\e[%sm%s\e[%sm", implode(';', $onCodes), $this->aligned(), implode(';', $offCodes));
+        return sprintf("\e[%sm%s\e[%sm", implode(';', $onCodes), $content, implode(';', $offCodes));
     }
 
     public function aligned() : string
@@ -127,7 +132,27 @@ class Text
         if($this->width < 1) {
             return $this->text;
         }
-        return implode(PHP_EOL, Vector::fromItems(explode(PHP_EOL, wordwrap($this->text, $this->width, PHP_EOL, true)))
-            ->map($line ==> str_pad($line, $this->width, ' ', $this->alignment)));
+        return implode(PHP_EOL, $this->breakToLines());
+    }
+
+    private function breakToLines() : Vector<string>
+    {
+        if($this->width < 1) {
+            $text = $this->text;
+        } else {
+            $text = wordwrap($this->text, $this->width, PHP_EOL, true);
+        }
+        return Vector::fromItems(explode(PHP_EOL, $text))
+            ->map($line ==> str_pad($line, $this->width, ' ', $this->alignment));
+    }
+
+    public function toVector() : Vector<string>
+    {
+        return $this->breakToLines()->map($line ==> $this->applyStyleTo($line));
+    }
+
+    public function raw() : string
+    {
+        return $this->text;
     }
 }

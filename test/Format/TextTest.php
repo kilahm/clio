@@ -102,4 +102,28 @@ class TextTest extends \HackPack\HackUnit\Core\TestCase
         $this->expect(Text::style(self::$content)->toWidth(15)->with($style))
             ->toBeIdenticalTo($expected);
     }
+
+    public function testTextToVector13() : void
+    {
+        $expected = Vector{
+            'The quick    ',
+            'brown fox    ',
+            'jumps over   ',
+            'the lazy dog ',
+        };
+        $this->expect(Text::style(self::$content)->toWidth(13)->toVector())
+            ->toEqual($expected);
+    }
+
+    public function testColoredTextToVector13() : void
+    {
+        $expected = Vector{
+            "\e[34m" . 'The quick    ' . "\e[39m",
+            "\e[34m" . 'brown fox    ' . "\e[39m",
+            "\e[34m" . 'jumps over   ' . "\e[39m",
+            "\e[34m" . 'the lazy dog ' . "\e[39m",
+        };
+        $this->expect(Text::style(self::$content)->fg(TextColor::blue)->toWidth(13)->toVector())
+            ->toEqual($expected);
+    }
 }
