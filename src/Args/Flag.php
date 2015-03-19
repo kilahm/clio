@@ -24,4 +24,9 @@ class Flag implements Opt
         $this->trigger('parse');
         return $this->count;
     }
+
+    public function wasPresent() : bool
+    {
+        return $this->occurances() > 0;
+    }
 }

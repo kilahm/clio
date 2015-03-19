@@ -12,7 +12,7 @@ class Clio
     /**
      * Factory method for most use cases
      */
-    public static function make() : this
+    public static function fromCli() : this
     {
         // Gather the argument values from the server superglobal
         // No filtering or sanitizing is performed
@@ -24,7 +24,7 @@ class Clio
         return new static(
             $name,
             $argv,
-            new Input\StreamReader(STDIN),
+            new Input\StreamReader(fopen('php://stdin', 'r')),
             // the STDOUT constant isn't marked as a writable stream?!
             new Output\StreamWriter(fopen('php://stdout', 'w')),
             new Util\Parser($argv),
@@ -91,9 +91,13 @@ class Clio
     /**
      * Command line arguments and options
      */
-    public function allArguments() : Vector<Args\Argument>
+    public function allArguments() : Map<string,string>
     {
-        return $this->parser->getArguments();
+        return Map::fromItems(
+            $this->parser->getArguments()->map(
+                $arg ==> Pair{$arg->getName(), $arg->value()}
+            )
+        );
     }
 
     public function arg(string $name) : Args\Argument
@@ -154,5 +158,10 @@ class Clio
     public function table(Traversable<Traversable<string>> $data) : Format\Table
     {
         return Format\Table::fromStrings($data);
+    }
+
+    public function style(string $body) : Format\Text
+    {
+        return Format\Text::style($body);
     }
 }

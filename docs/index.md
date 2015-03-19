@@ -1,0 +1,10 @@
+# Hack Clio
+
+A fluent library for [Hacklang](http://hacklang.org/) that makes input and output of command line scripts easier.
+
+Code hosted on [github](https://github.com/kilahm/HackClio), docs hosted on [Read the Docs](https://readthedocs.org/).
+
+This project was inspired by [PHP Commando](https://github.com/nategood/commando) and [Climate](http://climate.thephpleague.com/).
+
+This project is still in its infancy.  If you have suggestions, please open an issue on [github](https://github.com/kilahm/clio/issues) or [fork](https://github.com/kilahm/clio)
+the repository and submit a pull request.

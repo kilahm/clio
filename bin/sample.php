@@ -12,7 +12,7 @@ main();
 
 function main() : void
 {
-    $clio = Clio::make();
+    $clio = Clio::fromCli();
     show_styles($clio);
     show_table($clio);
 }
