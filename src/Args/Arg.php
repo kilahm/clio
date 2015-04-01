@@ -16,7 +16,7 @@ trait Arg
 
     public function describedAs(string $description) : this
     {
-        $this->description = '';
+        $this->description = $description;
         $this->trigger('described', $description, $this);
         return $this;
     }
@@ -24,5 +24,10 @@ trait Arg
     public function getName() : string
     {
         return $this->name;
+    }
+
+    public function getDescription() : string
+    {
+        return $this->description;
     }
 }

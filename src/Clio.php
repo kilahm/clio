@@ -8,6 +8,8 @@ use kilahm\Clio\Util\Environment as Env;
 class Clio
 {
     protected bool $customHelp = false;
+    protected Vector<Args\Argument> $args = Vector{};
+    protected Vector<Args\Opt> $options = Vector{};
 
     /**
      * Factory method for most use cases
@@ -28,6 +30,7 @@ class Clio
             // the STDOUT constant isn't marked as a writable stream?!
             new Output\StreamWriter(fopen('php://stdout', 'w')),
             new Util\Parser($argv),
+            new Format\Help($name),
         );
     }
 
@@ -37,6 +40,7 @@ class Clio
         protected Input\Reader $in,
         protected Output\Writer $out,
         protected Util\Parser $parser,
+        protected Format\Help $help,
     )
     {
         $parser->on('unknown option', (...) ==> {
@@ -63,13 +67,12 @@ class Clio
      * Trigger the built in help (or an exception)
      * with an optional reason for showing the help
      */
-    public function showHelp(string $reason) : void
+    public function showHelp(string $reason = '') : void
     {
         if($this->customHelp) {
             throw new Exception\CliHelp($reason);
         }
-        echo 'Help triggered';
-        // Figure out how to display help here
+        $this->out->writeln($this->help->render());
     }
 
     /**
@@ -103,10 +106,11 @@ class Clio
     public function arg(string $name) : Args\Argument
     {
         $a = $this->parser->arg($name);
+        $this->help->addArg($a);
         $a->on('filter error', (...) ==> {
             $args = Vector::fromItems(func_get_args());
             $value = $args->get(0);
-            $this->showHelp('"' . $value . '"' . ' is not a valid argument.');
+            $this->showHelp('"' . $value . '" is not a valid argument.');
             exit();
         });
 
@@ -124,6 +128,7 @@ class Clio
     public function option(string $name) : Args\Option
     {
         $o = $this->parser->option($name);
+        $this->help->addOption($o);
         $o->on('filter error', (...) ==> {
             $args = Vector::fromItems(func_get_args());
             $value = $args->get(0);
@@ -149,7 +154,9 @@ class Clio
 
     public function flag(string $name) : Args\Flag
     {
-        return $this->parser->flag($name);
+        $f = $this->parser->flag($name);
+        $this->help->addFlag($f);
+        return $f;
     }
 
     /**
@@ -163,5 +170,10 @@ class Clio
     public function style(string $body) : Format\Text
     {
         return Format\Text::style($body);
+    }
+
+    public function definitionList(?KeyedIterable<string,string> $data = null) : Format\DefinitionList
+    {
+        return Format\DefinitionList::make($data);
     }
 }

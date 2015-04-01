@@ -7,6 +7,12 @@ use kilahm\Clio\TextColor;
 use kilahm\Clio\TextEffect;
 use kilahm\Clio\UndoEffect;
 
+type StyleGroup = shape(
+    'fg' => TextColor,
+    'bg' => BackgroundColor,
+    'effects' => Vector<TextEffect>,
+);
+
 class Style
 {
     public static function make(

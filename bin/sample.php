@@ -15,6 +15,7 @@ function main() : void
     $clio = Clio::fromCli();
     show_styles($clio);
     show_table($clio);
+    show_help($clio);
 }
 
 function show_styles(Clio $clio) : void
@@ -48,4 +49,16 @@ function show_table(Clio $clio) : void
 
     $clio->show($clio->table($data)->render());
     $clio->show($clio->table($data)->withMaxColWidth(4)->render());
+}
+
+function show_help(Clio $clio) : void
+{
+    $clio->option('long-name')->describedAs('An option with a long name!');
+    $clio->option('a')->describedAs('An option with a short name.');
+    $clio->option('e')->aka('even-longer')->describedAs('A short option with an alias.');
+    $clio->option('looooong')->aka('l')->describedAs('A long option with a short alias.');
+
+    $clio->arg('arg1')->describedAs('The first argument.');
+    $clio->arg('another-argument')->describedAs('Another argument.');
+    $clio->showHelp('This is the reason string for the help.');
 }

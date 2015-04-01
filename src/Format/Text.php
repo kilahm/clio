@@ -7,12 +7,6 @@ use kilahm\Clio\TextColor;
 use kilahm\Clio\TextEffect;
 use kilahm\Clio\UndoEffect;
 
-type StyleGroup = shape(
-    'fg' => TextColor,
-    'bg' => BackgroundColor,
-    'effects' => Vector<TextEffect>,
-);
-
 <<__ConsistentConstruct>>
 class Text
 {
@@ -23,6 +17,12 @@ class Text
     public static function style(string $text) : this
     {
         return new static($text);
+    }
+
+    public function __construct(private string $text = '')
+    {
+        $this->width = mb_strlen($text);
+        $this->style = Style::plain();
     }
 
     public function with(StyleGroup $style) : string
@@ -36,12 +36,6 @@ class Text
     {
         $this->width = $width;
         return $this;
-    }
-
-    public function __construct(private string $text = '')
-    {
-        $this->width = mb_strlen($text);
-        $this->style = Style::plain();
     }
 
     public function setStyle(StyleGroup $style) : this
