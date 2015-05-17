@@ -24,8 +24,8 @@ class DefinitionListTest extends \HackPack\HackUnit\Core\TestCase
     {
         $list = DefinitionList::make(self::$data)->render();
         foreach(self::$data as $term => $description) {
-            $this->expect($list)->toMatch(sprintf('#%s#', $term));
-            $this->expect($list)->toMatch(sprintf('#%s#', $description));
+            $this->expect($list)->toMatch(sprintf('#%s#', preg_quote($term)));
+            $this->expect($list)->toMatch(sprintf('#%s#', preg_quote($description)));
         }
     }
 }

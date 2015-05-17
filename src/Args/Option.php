@@ -9,13 +9,27 @@ class Option implements Opt
 
     protected Vector<string> $values = Vector{};
     protected bool $required = false;
+    protected Vector<(function():void)> $missingValueListeners = Vector{};
+
+    public function onMissingValue((function():void) $listener) : this
+    {
+        $this->missingValueListeners->add($listener);
+        return $this;
+    }
+
+    public function triggerMissingValue() : void
+    {
+        foreach($this->missingValueListeners as $l) {
+            $l();
+        }
+    }
 
     public function set(?string $value) : void
     {
         if($value === null || $value === '') {
             $value = '';
             if($this->required) {
-                $this->trigger('missing option value', $this);
+                $this->triggerMissingValue();
             }
         }
 
@@ -26,7 +40,7 @@ class Option implements Opt
             }
             $this->values->add($value);
         } else {
-            $this->trigger('filter error', $value, $this);
+            $this->triggerValidationError($value);
         }
     }
 
@@ -41,7 +55,7 @@ class Option implements Opt
         return $this->pickedValue($all->get($all->count() - 1));
     }
 
-    public function pickedValue(?string $val) : string
+    private function pickedValue(?string $val) : string
     {
         if($val === null) {
             $val = $this->default;
@@ -51,7 +65,7 @@ class Option implements Opt
 
     public function allValues() : Vector<string>
     {
-        $this->trigger('parse');
+        $this->triggerParse();
         return $this->values->toVector();
     }
 
@@ -62,7 +76,7 @@ class Option implements Opt
 
     public function occurances() : int
     {
-        $this->trigger('parse');
+        $this->triggerParse();
         return $this->values->count();
     }
 

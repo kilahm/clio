@@ -141,7 +141,7 @@ class ParserTest extends \HackPack\HackUnit\Core\TestCase
     {
         $p = $this->buildParser('-o');
         $o = $p->option('o')->withRequiredValue();
-        $o->on('missing option value', (...) ==> {
+        $o->onMissingValue(() ==> {
             throw new \Exception('missing value');
         });
         $this->expectCallable(() ==> {

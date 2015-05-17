@@ -6,8 +6,8 @@ interface Opt
 {
     public function reset() : void;
     public function occurances() : int;
-    public function on(string $eventName, (function(...):void) $callback) : void;
     public function getName() : string;
     public function getDescription() : string;
-    public function trigger(string $key, ...) : void;
+    public function onAliasAddition((function(string):void) $listener) : this;
+    public function onParse((function():void) $listener) : this;
 }

@@ -9,11 +9,30 @@ trait ValuedArg
     protected Vector<(function(string):bool)> $filters = Vector{};
     protected ?(function(string):string) $transform = null;
     protected ?string $default = null;
+    protected Vector<(function(string):void)> $errorListeners = Vector{};
+
+    public function onValidationError((function(string):void) $listener) : this
+    {
+        $this->errorListeners->add($listener);
+        return $this;
+    }
+
+    protected function triggerValidationError(string $value) : void
+    {
+        foreach($this->errorListeners as $l) {
+            $l($value);
+        }
+    }
 
     public function withDefault(string $default) : this
     {
         $this->default = $default;
         return $this;
+    }
+
+    public function valueIsOptional() : bool
+    {
+        return $this->default !== null;
     }
 
     public function filteredBy((function(string):bool) $filter) : this

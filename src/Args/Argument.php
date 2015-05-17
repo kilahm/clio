@@ -2,11 +2,26 @@
 
 namespace kilahm\Clio\Args;
 
-class Argument
+final class Argument
 {
     use ValuedArg;
 
+    protected Vector<(function():void)> $missingListeners = Vector{};
+    protected bool $optional = false;
     protected string $value = '';
+
+    public function onMissing((function():void) $listener) : this
+    {
+        $this->missingListeners->add($listener);
+        return $this;
+    }
+
+    protected function triggerMissing() : void
+    {
+        foreach($this->missingListeners as $l) {
+            $l();
+        }
+    }
 
     public function set(string $value) : void
     {
@@ -17,18 +32,18 @@ class Argument
             }
             $this->value = $value;
         } else {
-            $this->trigger('filter error', $value, $this);
+            $this->triggerValidationError($value);
         }
     }
 
     public function value() : string
     {
-        $this->trigger('parse');
+        $this->triggerParse();
         if($this->value === '') {
             if($this->default !== null) {
                 return $this->default;
             }
-            $this->trigger('missing argument', $this);
+            $this->triggerMissing();
         }
         return $this->value;
     }

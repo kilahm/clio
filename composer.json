@@ -10,8 +10,7 @@
         }
     ],
     "require": {
-        "hhvm": ">=3.5.0",
-        "hackpack/hacktions": "~1.1"
+        "hhvm": ">=3.5.0"
     },
     "require-dev": {
         "hackpack/hackunit": "0.3.*"

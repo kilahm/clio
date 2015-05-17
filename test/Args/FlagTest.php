@@ -28,7 +28,7 @@ class FlagTest extends \HackPack\HackUnit\Core\TestCase
     public function testFlagTriggersParseOnAccess() : void
     {
         $f = new Flag('test');
-        $f->on('parse', (...) ==> {
+        $f->onParse(() ==> {
             throw new \Exception('parsed');
         });
 

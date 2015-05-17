@@ -107,19 +107,13 @@ class Clio
     {
         $a = $this->parser->arg($name);
         $this->help->addArg($a);
-        $a->on('filter error', (...) ==> {
-            $args = Vector::fromItems(func_get_args());
-            $value = $args->get(0);
+        $a->onValidationError((string $value) ==> {
             $this->showHelp('"' . $value . '" is not a valid argument.');
             exit();
         });
 
-        $a->on('missing argument', (...) ==> {
-            $arg = func_get_arg(0);
-            if( ! ($arg instanceof Args\Argument)) {
-                throw new \InvalidArgumentException('missing argument event must pass the argument object.');
-            }
-            $this->showHelp('Missing argument "' . $arg->getName() . '"');
+        $a->onMissing(() ==> {
+            $this->showHelp('Missing argument "' . $a->getName() . '"');
         });
 
         return $a;
@@ -129,23 +123,13 @@ class Clio
     {
         $o = $this->parser->option($name);
         $this->help->addOption($o);
-        $o->on('filter error', (...) ==> {
-            $args = Vector::fromItems(func_get_args());
-            $value = $args->get(0);
-            $option = $args->get(1);
-            if( ! ($option instanceof Args\Option)) {
-                throw new \InvalidArgumentException('option filter error event must pass the option object.');
-            }
-            $this->showHelp('"' . $value . '"' . ' is not a valid value for ' . $option->getName());
+        $o->onValidationError((string $value) ==> {
+            $this->showHelp('"' . $value . '"' . ' is not a valid value for ' . $o->getName());
             exit();
         });
 
-        $o->on('missing option value', (...) ==> {
-            $option = func_get_arg(0);
-            if( ! ($option instanceof Args\Option)) {
-                throw new \InvalidArgumentException('missing option value event must pass the option object.');
-            }
-            $this->showHelp('Option ' . $option->getName() . ' requires a value.');
+        $o->onMissingValue(() ==> {
+            $this->showHelp('Option ' . $o->getName() . ' requires a value.');
             exit();
         });
 

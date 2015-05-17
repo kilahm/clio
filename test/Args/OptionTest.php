@@ -9,7 +9,7 @@ class OptionTest extends \HackPack\HackUnit\Core\TestCase
     public function testOptionTriggersParseOnAccess() : void
     {
         $opt = new Option('test');
-        $opt->on('parse', (...) ==> {
+        $opt->onParse(() ==> {
             throw new \Exception('parsed');
         });
 
@@ -107,7 +107,7 @@ class OptionTest extends \HackPack\HackUnit\Core\TestCase
     {
         $opt = new Option('test');
         $opt->withRequiredValue();
-        $opt->on('missing option value', (...) ==> {
+        $opt->onMissingValue(() ==> {
             throw new \Exception('missing value');
         });
         $this->expectCallable(() ==> {
@@ -118,21 +118,10 @@ class OptionTest extends \HackPack\HackUnit\Core\TestCase
         })->toThrow(\Exception::class, 'missing value');
     }
 
-    public function testOptionTriggersMissingValueErrorWithCorrectParameters() : void
-    {
-        $opt = new Option('test');
-        $opt->on('missing option value', (...) ==> {
-            $args = Vector::fromItems(func_get_args());
-            $this->expect($args->count())->toEqual(1);
-            $this->expect($args->get(0))->toBeIdenticalTo($opt);
-        });
-        $opt->set(null);
-    }
-
     public function testOptionDoesNotTriggerMissingValueErrorWhenNotRequired() : void
     {
         $opt = new Option('test');
-        $opt->on('missing option value', (...) ==> {
+        $opt->onMissingValue(() ==> {
             throw new \Exception('missing value');
         });
         $this->expectCallable(() ==> {

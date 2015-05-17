@@ -6,15 +6,17 @@ use kilahm\Clio\Args\Argument;
 
 class ArgumentTest extends \HackPack\HackUnit\Core\TestCase
 {
+    <<test>>
     public function testArgumentTriggersParseEventOnAccess() : void
     {
         $arg = new Argument('test');
-        $arg->on('parse', (...) ==> {throw new \Exception('Parsing');});
+        $arg->onParse(() ==> {throw new \Exception('Parsing');});
         $this->expectCallable(() ==> {
             $arg->value();
         })->toThrow(\Exception::class, 'Parsing');
     }
 
+    <<test>>
     public function testArgumentFailsToSetOnFailedFilter() : void
     {
         $arg = new Argument('test');
@@ -23,28 +25,29 @@ class ArgumentTest extends \HackPack\HackUnit\Core\TestCase
         $this->expect($arg->value())->toBeIdenticalTo('');
     }
 
+    <<test>>
     public function testArgumentGivesEmptyStringWhenNotSet() : void
     {
         $arg = new Argument('test');
         $this->expect($arg->value())->toBeIdenticalTo('');
     }
 
+    <<test>>
     public function testArgumentTriggersFilterErrorOnFailedFilter() : void
     {
         $arg = new Argument('test');
         $arg->filteredBy(($val) ==> false);
         $testValue = 'test string';
-        $arg->on('filter error', (...) ==> {
-            $args = Vector::fromItems(func_get_args());
-            $this->expect($args->count())->toEqual(2);
-            $this->expect($args->get(0))->toBeIdenticalTo($testValue);
-            $this->expect($args->get(1))->toBeIdenticalTo($arg);
+        $arg->onValidationError((string $value) ==> {
+            $this->expect($value)->toEqual($testValue);
+            throw new \Exception('filtering');
         });
         $this->expectCallable(() ==> {
             $arg->set($testValue);
-        })->toNotThrow();
+        })->toThrow(\Exception::class, 'filtering');
     }
 
+    <<test>>
     public function testArgumentSavesValue() : void
     {
         $arg = new Argument('test');
@@ -52,6 +55,7 @@ class ArgumentTest extends \HackPack\HackUnit\Core\TestCase
         $this->expect($arg->value())->toEqual('value');
     }
 
+    <<test>>
     public function testArgumentGivesDefaultWhenNotSet() : void
     {
         $arg = new Argument('test');
@@ -59,6 +63,7 @@ class ArgumentTest extends \HackPack\HackUnit\Core\TestCase
         $this->expect($arg->value())->toEqual('default');
     }
 
+    <<test>>
     public function testArgumentOverridesDefaultWhenSet() : void
     {
         $arg = new Argument('test');
@@ -66,10 +71,11 @@ class ArgumentTest extends \HackPack\HackUnit\Core\TestCase
         $this->expect($arg->value())->toEqual('value');
     }
 
+    <<test>>
     public function testArgumentTriggersMissingValueWhenNotSet() : void
     {
         $arg = new Argument('test');
-        $arg->on('missing argument', (...) ==> {
+        $arg->onMissing(() ==> {
             throw new \Exception('missing argument');
         });
 
@@ -78,6 +84,7 @@ class ArgumentTest extends \HackPack\HackUnit\Core\TestCase
         })->toThrow(\Exception::class, 'missing argument');
     }
 
+    <<test>>
     public function testArgumentTransformsValue() : void
     {
         $arg = new Argument('test');

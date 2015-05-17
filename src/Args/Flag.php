@@ -21,7 +21,7 @@ class Flag implements Opt
 
     public function occurances() : int
     {
-        $this->trigger('parse');
+        $this->triggerParse();
         return $this->count;
     }
 

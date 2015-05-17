@@ -33,7 +33,7 @@ class Parser
     {
         $this->validateName($name);
         $a = new Argument($name);
-        $a->on('parse', (...) ==> $this->parse());
+        $a->onParse(inst_meth($this, 'parse'));
         $this->arguments->add($a);
         return $a;
     }
@@ -58,18 +58,11 @@ class Parser
     private function registerOpt(Opt $opt) : void
     {
         $this->skipParsing = false;
-        $opt->on('parse', (...) ==> $this->parse());
-        $opt->on('aka', (...) ==> {
-            $optrgs = Vector::fromItems(func_get_args());
-            $optlias = $optrgs->get(0);
-            $flag = $optrgs->get(1);
-            if(
-                is_string($optlias) &&
-                $flag instanceof Opt
-            ) {
-                $this->options->set($optlias, $flag);
-            }
-        });
+        $opt
+            ->onParse(inst_meth($this, 'parse'))
+            ->onAliasAddition((string $newAlias) ==> {
+                $this->options->set($newAlias, $opt);
+            });
         $this->options->set($opt->getName(), $opt);
     }
 
@@ -78,6 +71,7 @@ class Parser
         if($this->skipParsing) {
             return;
         }
+        $this->skipParsing = true;
 
         // Reset everything
         $this->parsedArguments->clear();
@@ -98,8 +92,6 @@ class Parser
                 $this->processArg($argText);
             }
         }
-
-        $this->skipParsing = true;
     }
 
     private function processArg(string $argText) : void

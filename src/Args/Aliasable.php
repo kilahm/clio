@@ -8,10 +8,25 @@ trait Aliasable
 
     protected Set<string> $names = Set{};
 
+    protected Vector<(function(string):void)> $akaListeners = Vector{};
+
+    public function onAliasAddition((function(string):void) $listener) : this
+    {
+        $this->akaListeners->add($listener);
+        return $this;
+    }
+
+    public function triggerAliasAddition(string $newAlias) : void
+    {
+        foreach($this->akaListeners as $l) {
+            $l($newAlias);
+        }
+    }
+
     public function aka(string $name) : this
     {
         $this->names->add($name);
-        $this->trigger('aka', $name, $this);
+        $this->triggerAliasAddition($name);
         return $this;
     }
 
