@@ -33,8 +33,8 @@ class ParserTest extends \HackPack\HackUnit\Core\TestCase
     public function testParserEmitsUnknownLongOption() : void
     {
         $p = $this->buildParser('--unknown');
-        $p->on('unknown option', (...) ==> {
-            throw new \Exception(func_get_args()[0]);
+        $p->onUnknownOption($name ==> {
+            throw new \Exception($name);
         });
         $this->expectCallable(() ==> {
             $p->parse();
@@ -44,8 +44,8 @@ class ParserTest extends \HackPack\HackUnit\Core\TestCase
     public function testParserEmitsUnknownBuriedLongOption() : void
     {
         $p = $this->buildParser('--known', '--unknown', '--known');
-        $p->on('unknown option', (...) ==> {
-            throw new \Exception(func_get_args()[0]);
+        $p->onUnknownOption($name ==> {
+            throw new \Exception($name);
         });
         $p->option('known');
         $this->expectCallable(() ==> {
@@ -56,8 +56,8 @@ class ParserTest extends \HackPack\HackUnit\Core\TestCase
     public function testParserEmitsUnknownShortOption() : void
     {
         $p = $this->buildParser('-k');
-        $p->on('unknown option', (...) ==> {
-            throw new \Exception(func_get_args()[0]);
+        $p->onUnknownOption($name ==> {
+            throw new \Exception($name);
         });
         $this->expectCallable(() ==> {
             $p->parse();
@@ -67,7 +67,7 @@ class ParserTest extends \HackPack\HackUnit\Core\TestCase
     public function testParserEmitsUnknownBuriedShortOption() : void
     {
         $p = $this->buildParser('-aka');
-        $p->on('unknown option', (...) ==> {
+        $p->onUnknownOption($name ==> {
             throw new \Exception(func_get_args()[0]);
         });
         $p->flag('a');

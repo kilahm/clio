@@ -43,11 +43,7 @@ class Clio
         protected Format\Help $help,
     )
     {
-        $parser->on('unknown option', (...) ==> {
-            $name = func_get_arg(0);
-            if(! is_string($name)) {
-                throw new \InvalidArgumentException('Unknown option event must pass the name of the unknown option as a string.');
-            }
+        $parser->onUnknownOption((string $name) ==> {
             $this->showHelp('Unknown option: ' . $name);
             exit();
         });

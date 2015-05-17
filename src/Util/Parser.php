@@ -6,21 +6,32 @@ use kilahm\Clio\Args\Argument;
 use kilahm\Clio\Args\Flag;
 use kilahm\Clio\Args\Opt;
 use kilahm\Clio\Args\Option;
-use HackPack\Hacktions\EventEmitter;
 
 
 class Parser
 {
-    use EventEmitter;
-
     protected Map<string, Opt> $options = Map{};
     protected Vector<Argument> $arguments = Vector{};
     protected Vector<Argument> $parsedArguments = Vector{};
+    protected Vector<(function(string):void)> $unknownOptionListeners = Vector{};
 
     private bool $skipParsing = false;
 
     public function __construct(protected Vector<string> $argv)
     {
+    }
+
+    public function onUnknownOption((function(string):void) $listener) : this
+    {
+        $this->unknownOptionListeners->add($listener);
+        return $this;
+    }
+
+    public function triggerUnknownOption(string $name) : void
+    {
+        foreach($this->unknownOptionListeners as $l) {
+            $l($name);
+        }
     }
 
     public function getArguments() : Vector<Argument>
@@ -53,7 +64,6 @@ class Parser
         $this->registerOpt($f);
         return $f;
     }
-
 
     private function registerOpt(Opt $opt) : void
     {
@@ -119,7 +129,7 @@ class Parser
         } elseif($opt instanceof Flag) {
             $opt->found();
         } elseif($opt === null) {
-            $this->trigger('unknown option', $name);
+            $this->triggerUnknownOption($name);
         }
     }
 
@@ -143,7 +153,7 @@ class Parser
             } elseif($opt instanceof Flag) {
                 $opt->found();
             } elseif($opt === null) {
-                $this->trigger('unknown option', $name);
+                $this->triggerUnknownOption($name);
             }
         }
     }
