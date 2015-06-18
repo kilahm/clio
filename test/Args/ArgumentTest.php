@@ -3,93 +3,95 @@
 namespace kilahm\Clio\Test\Args;
 
 use kilahm\Clio\Args\Argument;
+use HackPack\HackUnit\Contract\Assert;
 
-class ArgumentTest extends \HackPack\HackUnit\Core\TestCase
+<<TestSuite>>
+class ArgumentTest
 {
-    <<test>>
-    public function testArgumentTriggersParseEventOnAccess() : void
+    <<Test>>
+    public function testArgumentTriggersParseEventOnAccess(Assert $assert) : void
     {
         $arg = new Argument('test');
         $arg->onParse(() ==> {throw new \Exception('Parsing');});
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $arg->value();
-        })->toThrow(\Exception::class, 'Parsing');
+        })->willThrowClassWithMessage(\Exception::class, 'Parsing');
     }
 
-    <<test>>
-    public function testArgumentFailsToSetOnFailedFilter() : void
+    <<Test>>
+    public function testArgumentFailsToSetOnFailedFilter(Assert $assert) : void
     {
         $arg = new Argument('test');
         $arg->filteredBy(($val) ==> false);
         $arg->set('anything');
-        $this->expect($arg->value())->toBeIdenticalTo('');
+        $assert->string($arg->value())->is('');
     }
 
-    <<test>>
-    public function testArgumentGivesEmptyStringWhenNotSet() : void
+    <<Test>>
+    public function testArgumentGivesEmptyStringWhenNotSet(Assert $assert) : void
     {
         $arg = new Argument('test');
-        $this->expect($arg->value())->toBeIdenticalTo('');
+        $assert->string($arg->value())->is('');
     }
 
-    <<test>>
-    public function testArgumentTriggersFilterErrorOnFailedFilter() : void
+    <<Test>>
+    public function testArgumentTriggersFilterErrorOnFailedFilter(Assert $assert) : void
     {
         $arg = new Argument('test');
         $arg->filteredBy(($val) ==> false);
         $testValue = 'test string';
         $arg->onValidationError((string $value) ==> {
-            $this->expect($value)->toEqual($testValue);
+            $assert->string($value)->is($testValue);
             throw new \Exception('filtering');
         });
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $arg->set($testValue);
-        })->toThrow(\Exception::class, 'filtering');
+        })->willThrowClassWithMessage(\Exception::class, 'filtering');
     }
 
-    <<test>>
-    public function testArgumentSavesValue() : void
+    <<Test>>
+    public function testArgumentSavesValue(Assert $assert) : void
     {
         $arg = new Argument('test');
         $arg->set('value');
-        $this->expect($arg->value())->toEqual('value');
+        $assert->string($arg->value())->is('value');
     }
 
-    <<test>>
-    public function testArgumentGivesDefaultWhenNotSet() : void
+    <<Test>>
+    public function testArgumentGivesDefaultWhenNotSet(Assert $assert) : void
     {
         $arg = new Argument('test');
         $arg->withDefault('default');
-        $this->expect($arg->value())->toEqual('default');
+        $assert->string($arg->value())->is('default');
     }
 
-    <<test>>
-    public function testArgumentOverridesDefaultWhenSet() : void
+    <<Test>>
+    public function testArgumentOverridesDefaultWhenSet(Assert $assert) : void
     {
         $arg = new Argument('test');
         $arg->withDefault('default')->set('value');
-        $this->expect($arg->value())->toEqual('value');
+        $assert->string($arg->value())->is('value');
     }
 
-    <<test>>
-    public function testArgumentTriggersMissingValueWhenNotSet() : void
+    <<Test>>
+    public function testArgumentTriggersMissingValueWhenNotSet(Assert $assert) : void
     {
         $arg = new Argument('test');
         $arg->onMissing(() ==> {
             throw new \Exception('missing argument');
         });
 
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $arg->value();
-        })->toThrow(\Exception::class, 'missing argument');
+        })->willThrowClassWithMessage(\Exception::class, 'missing argument');
     }
 
-    <<test>>
-    public function testArgumentTransformsValue() : void
+    <<Test>>
+    public function testArgumentTransformsValue(Assert $assert) : void
     {
         $arg = new Argument('test');
         $arg->transformedBy(($in) ==> 'out');
         $arg->set('value');
-        $this->expect($arg->value())->toBeIdenticalTo('out');
+        $assert->string($arg->value())->is('out');
     }
 }

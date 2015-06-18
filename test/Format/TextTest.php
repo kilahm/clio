@@ -2,6 +2,7 @@
 
 namespace kilahm\Clio\Test\Format;
 
+use HackPack\HackUnit\Contract\Assert;
 use kilahm\Clio\BackgroundColor;
 use kilahm\Clio\Format\Text;
 use kilahm\Clio\Format\Style;
@@ -9,76 +10,88 @@ use kilahm\Clio\TextColor;
 use kilahm\Clio\TextEffect;
 use kilahm\Clio\UndoEffect;
 
-class TextTest extends \HackPack\HackUnit\Core\TestCase
+<<TestSuite>>
+class TextTest
 {
     private static string $content = 'The quick brown fox jumps over the lazy dog';
 
-    public function testPlainTextIsPlain() : void
+    <<Test>>
+    public function testPlainTextIsPlain(Assert $assert) : void
     {
-        $this->expect(Text::style(self::$content)->with(Style::plain()))->toBeIdenticalTo(self::$content);
+        $assert->string(Text::style(self::$content)->with(Style::plain()))
+            ->is(self::$content);
     }
 
-    public function testForegroundColorOnly() : void
+    <<Test>>
+    public function testForegroundColorOnly(Assert $assert) : void
     {
         $style = Style::make(TextColor::blue);
-        $this->expect(Text::style(self::$content)->with($style))
-            ->toEqual("\e[34m" . self::$content . "\e[39m");
+        $assert->string(Text::style(self::$content)->with($style))
+            ->is("\e[34m" . self::$content . "\e[39m");
     }
 
-    public function testBackgroundColorOnly() : void
+    <<Test>>
+    public function testBackgroundColorOnly(Assert $assert) : void
     {
         $style = Style::make(null, BackgroundColor::blue);
-        $this->expect(Text::style(self::$content)->with($style))
-            ->toEqual("\e[44m" . self::$content . "\e[49m");
+        $assert->string(Text::style(self::$content)->with($style))
+            ->is("\e[44m" . self::$content . "\e[49m");
     }
 
-    public function testForegroundAndBackGroundColor() : void
+    <<Test>>
+    public function testForegroundAndBackGroundColor(Assert $assert) : void
     {
         $style = Style::make(TextColor::blue, BackgroundColor::blue);
-        $this->expect(Text::style(self::$content)->with($style))
-            ->toEqual("\e[34;44m" . self::$content . "\e[39;49m");
+        $assert->string(Text::style(self::$content)->with($style))
+            ->is("\e[34;44m" . self::$content . "\e[39;49m");
     }
 
-    public function testOneEffect() : void
+    <<Test>>
+    public function testOneEffect(Assert $assert) : void
     {
         $style = Style::make(null, null, Vector{TextEffect::italic});
-        $this->expect(Text::style(self::$content)->with($style))
-            ->toEqual("\e[3m" . self::$content . "\e[23m");
+        $assert->string(Text::style(self::$content)->with($style))
+            ->is("\e[3m" . self::$content . "\e[23m");
     }
 
-    public function testManyEffects() : void
+    <<Test>>
+    public function testManyEffects(Assert $assert) : void
     {
         $effects = Vector{TextEffect::italic, TextEffect::bold, TextEffect::underline};
         $style = Style::make(null, null, $effects);
-        $this->expect(Text::style(self::$content)->with($style))
-            ->toEqual("\e[3;1;4m" . self::$content . "\e[23;22;24m");
+        $assert->string(Text::style(self::$content)->with($style))
+            ->is("\e[3;1;4m" . self::$content . "\e[23;22;24m");
     }
 
-    public function testItAll() : void
+    <<Test>>
+    public function testItAll(Assert $assert) : void
     {
         $effects = Vector{TextEffect::italic, TextEffect::bold, TextEffect::underline};
         $style = Style::make(TextColor::blue, BackgroundColor::blue, $effects);
-        $this->expect(Text::style(self::$content)->with($style))
-            ->toEqual("\e[34;44;3;1;4m" . self::$content . "\e[39;49;23;22;24m");
+        $assert->string(Text::style(self::$content)->with($style))
+            ->is("\e[34;44;3;1;4m" . self::$content . "\e[39;49;23;22;24m");
     }
 
-    public function testTextBigWidth() : void
+    <<Test>>
+    public function testTextBigWidth(Assert $assert) : void
     {
-        $this->expect((string)Text::style(self::$content)->toWidth(50))
-            ->toBeIdenticalTo(str_pad(self::$content, 50));
+        $assert->string((string)Text::style(self::$content)->toWidth(50))
+            ->is(str_pad(self::$content, 50));
     }
 
-    public function testTextWidth15() : void
+    <<Test>>
+    public function testTextWidth15(Assert $assert) : void
     {
         $expected =
             'The quick brown' . PHP_EOL .
             'fox jumps over ' . PHP_EOL .
             'the lazy dog   ';
-        $this->expect((string)Text::style(self::$content)->toWidth(15))
-            ->toBeIdenticalTo($expected);
+        $assert->string((string)Text::style(self::$content)->toWidth(15))
+            ->is($expected);
     }
 
-    public function testTextWidth13() : void
+    <<Test>>
+    public function testTextWidth13(Assert $assert) : void
     {
         $expected =
             'The quick    ' . PHP_EOL .
@@ -86,11 +99,12 @@ class TextTest extends \HackPack\HackUnit\Core\TestCase
             'jumps over   ' . PHP_EOL .
             'the lazy dog ';
 
-        $this->expect((string)Text::style(self::$content)->toWidth(13))
-            ->toBeIdenticalTo($expected);
+        $assert->string((string)Text::style(self::$content)->toWidth(13))
+            ->is($expected);
     }
 
-    public function testTextWidth15WithColor() : void
+    <<Test>>
+    public function testTextWidth15WithColor(Assert $assert) : void
     {
         $expected =
             "\e[34;44m" .
@@ -99,11 +113,12 @@ class TextTest extends \HackPack\HackUnit\Core\TestCase
             'the lazy dog   ' .
             "\e[39;49m";
         $style = Style::make(TextColor::blue, BackgroundColor::blue);
-        $this->expect(Text::style(self::$content)->toWidth(15)->with($style))
-            ->toBeIdenticalTo($expected);
+        $assert->string(Text::style(self::$content)->toWidth(15)->with($style))
+            ->is($expected);
     }
 
-    public function testTextToVector13() : void
+    <<Test>>
+    public function testTextToVector13(Assert $assert) : void
     {
         $expected = Vector{
             'The quick    ',
@@ -111,11 +126,12 @@ class TextTest extends \HackPack\HackUnit\Core\TestCase
             'jumps over   ',
             'the lazy dog ',
         };
-        $this->expect(Text::style(self::$content)->toWidth(13)->toVector())
-            ->toEqual($expected);
+        $assert->mixed(Text::style(self::$content)->toWidth(13)->toVector())
+            ->looselyEquals($expected);
     }
 
-    public function testColoredTextToVector13() : void
+    <<Test>>
+    public function testColoredTextToVector13(Assert $assert) : void
     {
         $expected = Vector{
             "\e[34m" . 'The quick    ' . "\e[39m",
@@ -123,7 +139,7 @@ class TextTest extends \HackPack\HackUnit\Core\TestCase
             "\e[34m" . 'jumps over   ' . "\e[39m",
             "\e[34m" . 'the lazy dog ' . "\e[39m",
         };
-        $this->expect(Text::style(self::$content)->fg(TextColor::blue)->toWidth(13)->toVector())
-            ->toEqual($expected);
+        $assert->mixed(Text::style(self::$content)->fg(TextColor::blue)->toWidth(13)->toVector())
+            ->looselyEquals($expected);
     }
 }

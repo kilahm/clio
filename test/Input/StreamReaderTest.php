@@ -2,39 +2,40 @@
 
 namespace kilahm\Clio\Test\Input;
 
+use HackPack\HackUnit\Contract\Assert;
 use kilahm\Clio\Exception\ReadError;
 use kilahm\Clio\Input\StreamReader;
 
-class StreamReaderTest extends \HackPack\HackUnit\Core\TestCase
+class StreamReaderTest
 {
     private array<int,resource> $pipes = [];
     private ?resource $proc = null;
 
-    <<test>>
-    public function testReaderNeedsReadableStream() : void
+    <<Test>>
+    public function testReaderNeedsReadableStream(Assert $assert) : void
     {
         $write = fopen('php://temp', 'w');
         file_put_contents('/tmp/clio.read', 'test string');
         $read = fopen('/tmp/clio.read', 'r');
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $reader = new StreamReader($write);
             $reader->getChar();
-        })->toThrow(ReadError::class);
-        $this->expectCallable(() ==> {
+        })->willThrowClass(ReadError::class);
+        $assert->whenCalled(() ==> {
             $reader = new StreamReader($read);
             $reader->getChar();
-        })->toNotThrow();
+        })->willNotThrow();
         fclose($write);
         fclose($read);
     }
 
-    <<test>>
-    public function testReaderWaitsForLine() : void
+    <<Test>>
+    public function testReaderWaitsForLine(Assert $assert) : void
     {
         $reader = new StreamReader(
             $this->startProc('printf a;sleep 0.01;printf "\n"')
         );
-        $this->expect($reader->waitForLine())->toEqual("a");
+        $assert->string($reader->waitForLine())->is("a");
         $this->closeStreams();
     }
 

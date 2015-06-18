@@ -2,35 +2,39 @@
 
 namespace kilahm\Clio\Test\Args;
 
+use HackPack\HackUnit\Contract\Assert;
 use kilahm\Clio\Args\Option;
 
-class OptionTest extends \HackPack\HackUnit\Core\TestCase
+<<TestSuite>>
+class OptionTest
 {
-    public function testOptionTriggersParseOnAccess() : void
+    <<Test>>
+    public function testOptionTriggersParseOnAccess(Assert $assert) : void
     {
         $opt = new Option('test');
         $opt->onParse(() ==> {
             throw new \Exception('parsed');
         });
 
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $opt->firstValue();
-        })->toThrow(\Exception::class, 'parsed');
+        })->willThrowClassWithMessage(\Exception::class, 'parsed');
 
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $opt->lastValue();
-        })->toThrow(\Exception::class, 'parsed');
+        })->willThrowClassWithMessage(\Exception::class, 'parsed');
 
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $opt->allValues();
-        })->toThrow(\Exception::class, 'parsed');
+        })->willThrowClassWithMessage(\Exception::class, 'parsed');
 
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $opt->occurances();
-        })->toThrow(\Exception::class, 'parsed');
+        })->willThrowClassWithMessage(\Exception::class, 'parsed');
     }
 
-    public function testOptionSavesAllValues() : void
+    <<Test>>
+    public function testOptionSavesAllValues(Assert $assert) : void
     {
         $opt = new Option('test');
         $vals = Vector{
@@ -44,53 +48,61 @@ class OptionTest extends \HackPack\HackUnit\Core\TestCase
             $opt->set($val);
         }
 
-        $this->expect($opt->firstValue())->toEqual('one');
-        $this->expect($opt->lastValue())->toEqual('');
-        $this->expect($opt->allValues())->toEqual($vals);
+        $assert->string($opt->firstValue())->is('one');
+        $assert->string($opt->lastValue())->is('');
+        foreach($opt->allValues() as $idx => $val) {
+            $assert->mixed($val)->identicalTo($vals->at($idx));
+        }
     }
 
-    public function testOptionGivesEmptySetWithDefault() : void
+    <<Test>>
+    public function testOptionGivesEmptySetWithDefault(Assert $assert) : void
     {
         $opt = new Option('test');
         $opt->withDefault('default');
-        $this->expect($opt->allValues())->toEqual(Vector{});
+        $assert->mixed($opt->allValues())->looselyEquals(Vector{});
     }
 
-    public function testOptionGivesDefaultWhenNotSet() : void
+    <<Test>>
+    public function testOptionGivesDefaultWhenNotSet(Assert $assert) : void
     {
         $opt = new Option('test');
         $opt->withDefault('default');
-        $this->expect($opt->firstValue())->toEqual('default');
+        $assert->string($opt->firstValue())->is('default');
     }
 
-    public function testOptionGiveValueWithDefault() : void
+    <<Test>>
+    public function testOptionGiveValueWithDefault(Assert $assert) : void
     {
         $opt = new Option('test');
         $opt->withDefault('default')->set('value');
-        $this->expect($opt->firstValue())->toEqual('value');
-        $this->expect($opt->allValues())->toEqual(Vector{'value'});
+        $assert->string($opt->firstValue())->is('value');
+        $assert->mixed($opt->allValues())->looselyEquals(Vector{'value'});
     }
 
-    public function testOptionGivesEmptyStringWhenNotSetWithNoDefault() : void
+    <<Test>>
+    public function testOptionGivesEmptyStringWhenNotSetWithNoDefault(Assert $assert) : void
     {
         $opt = new Option('test');
-        $this->expect($opt->firstValue())->toBeIdenticalTo('');
-        $this->expect($opt->allValues())->toEqual(Vector{});
+        $assert->string($opt->firstValue())->is('');
+        $assert->mixed($opt->allValues())->looselyEquals(Vector{});
     }
 
-    public function testOptionOccuranceCount() : void
+    <<Test>>
+    public function testOptionOccuranceCount(Assert $assert) : void
     {
         $opt = new Option('test');
-        $this->expect($opt->occurances())->toEqual(0);
+        $assert->int($opt->occurances())->eq(0);
         $opt->set('one');
-        $this->expect($opt->occurances())->toEqual(1);
+        $assert->int($opt->occurances())->eq(1);
         $opt->set('');
-        $this->expect($opt->occurances())->toEqual(2);
+        $assert->int($opt->occurances())->eq(2);
         $opt->set(null);
-        $this->expect($opt->occurances())->toEqual(3);
+        $assert->int($opt->occurances())->eq(3);
     }
 
-    public function testOptionTransformsValue() : void
+    <<Test>>
+    public function testOptionTransformsValue(Assert $assert) : void
     {
         $opt = new Option('test');
         $opt->transformedBy(($in) ==> {
@@ -100,46 +112,49 @@ class OptionTest extends \HackPack\HackUnit\Core\TestCase
         });
         $opt->set('val');
         $opt->set('val');
-        $this->expect($opt->allValues())->toEqual(Vector{'other1', 'other2'});
+        $assert->mixed($opt->allValues())->looselyEquals(Vector{'other1', 'other2'});
     }
 
-    public function testOptionTriggersMissingValueErrorWhenValueIsRequired() : void
+    <<Test>>
+    public function testOptionTriggersMissingValueErrorWhenValueIsRequired(Assert $assert) : void
     {
         $opt = new Option('test');
         $opt->withRequiredValue();
         $opt->onMissingValue(() ==> {
             throw new \Exception('missing value');
         });
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $opt->set(null);
-        })->toThrow(\Exception::class, 'missing value');
-        $this->expectCallable(() ==> {
+        })->willThrowClassWithMessage(\Exception::class, 'missing value');
+        $assert->whenCalled(() ==> {
             $opt->set('');
-        })->toThrow(\Exception::class, 'missing value');
+        })->willThrowClassWithMessage(\Exception::class, 'missing value');
     }
 
-    public function testOptionDoesNotTriggerMissingValueErrorWhenNotRequired() : void
+    <<Test>>
+    public function testOptionDoesNotTriggerMissingValueErrorWhenNotRequired(Assert $assert) : void
     {
         $opt = new Option('test');
         $opt->onMissingValue(() ==> {
             throw new \Exception('missing value');
         });
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $opt->set(null);
-        })->toNotThrow();
-        $this->expectCallable(() ==> {
+        })->willNotThrow();
+        $assert->whenCalled(() ==> {
             $opt->set('');
-        })->toNotThrow();
+        })->willNotThrow();
     }
 
-    public function testOptionCanBeCleared() : void
+    <<Test>>
+    public function testOptionCanBeCleared(Assert $assert) : void
     {
         $opt = new Option('test');
         $opt->set('test');
-        $this->expect($opt->occurances())->toEqual(1);
-        $this->expect($opt->firstValue())->toEqual('test');
+        $assert->int($opt->occurances())->eq(1);
+        $assert->string($opt->firstValue())->is('test');
         $opt->reset();
-        $this->expect($opt->occurances())->toEqual(0);
-        $this->expect($opt->firstValue())->toEqual('');
+        $assert->int($opt->occurances())->eq(0);
+        $assert->string($opt->firstValue())->is('');
     }
 }

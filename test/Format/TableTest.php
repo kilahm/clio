@@ -2,10 +2,11 @@
 
 namespace kilahm\Clio\Test\Format;
 
+use HackPack\HackUnit\Contract\Assert;
 use kilahm\Clio\Format\Table;
 use kilahm\Clio\Format\Text;
 
-class TableTest extends \HackPack\HackUnit\Core\TestCase
+class TableTest
 {
     <<__Memoize>>
     protected static function makeData() : Vector<Vector<Text>>
@@ -29,7 +30,8 @@ class TableTest extends \HackPack\HackUnit\Core\TestCase
         return new Table(self::makeData(), self::genScreenWidth());
     }
 
-    public function testDefaultTableHead() : void
+    <<Test>>
+    public function testDefaultTableHead(Assert $assert) : void
     {
         $expected =
             '+-----------------------------+' . PHP_EOL .
@@ -37,10 +39,11 @@ class TableTest extends \HackPack\HackUnit\Core\TestCase
             '+-----------------------------+' . PHP_EOL;
         $t = $this->makeTable();
         $data = self::makeData();
-        $this->expect($t->renderHead($data->at(0), $t->size()))->toEqual($expected);
+        $assert->string($t->renderHead($data->at(0), $t->size()))->is($expected);
     }
 
-    public function testSmallTableHead() : void
+    <<Test>>
+    public function testSmallTableHead(Assert $assert) : void
     {
         $expected =
             '+--------+' . PHP_EOL .
@@ -50,6 +53,6 @@ class TableTest extends \HackPack\HackUnit\Core\TestCase
         $t = $this->makeTable();
         $t->withMaxColWidth(2);
         $data = self::makeData();
-        $this->expect($t->renderHead($data->at(0), $t->size()))->toEqual($expected);
+        $assert->string($t->renderHead($data->at(0), $t->size()))->is($expected);
     }
 }

@@ -2,17 +2,19 @@
 
 namespace kilahm\Clio\Test\Output;
 
+use HackPack\HackUnit\Contract\Assert;
 use kilahm\Clio\Output\StreamWriter;
 
-class StreamWriterTest extends \HackPack\HackUnit\Core\TestCase
+<<TestSuite>>
+class StreamWriterTest
 {
-    <<test>>
-    public function testWriterWritesCharacter() : void
+    <<Test>>
+    public function testWriterWritesCharacter(Assert $assert) : void
     {
         $s = fopen('php://memory', 'w+');
         $w = new StreamWriter($s);
         $w->write('a');
-        $this->expect(stream_get_contents($s, 1, 0))->toBeIdenticalTo('a');
+        $assert->string(stream_get_contents($s, 1, 0))->is('a');
         fclose($s);
     }
 }

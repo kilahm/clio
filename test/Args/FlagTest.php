@@ -2,38 +2,43 @@
 
 namespace kilahm\Clio\Test\Args;
 
+use HackPack\HackUnit\Contract\Assert;
 use kilahm\Clio\Args\Flag;
 
-class FlagTest extends \HackPack\HackUnit\Core\TestCase
+<<TestSuite>>
+class FlagTest
 {
-    public function testFlagTracksOccurances() : void
+    <<Test>>
+    public function testFlagTracksOccurances(Assert $assert) : void
     {
         $f = new Flag('test');
         foreach(range(0,5) as $i) {
-            $this->expect($f->occurances())->toEqual($i);
+            $assert->int($f->occurances())->eq($i);
             $f->found();
         }
     }
 
-    public function testFlagCanBeReset() : void
+    <<Test>>
+    public function testFlagCanBeReset(Assert $assert) : void
     {
         $f = new Flag('test');
         $f->found();
         $f->found();
-        $this->expect($f->occurances())->toEqual(2);
+        $assert->int($f->occurances())->eq(2);
         $f->reset();
-        $this->expect($f->occurances())->toEqual(0);
+        $assert->int($f->occurances())->eq(0);
     }
 
-    public function testFlagTriggersParseOnAccess() : void
+    <<Test>>
+    public function testFlagTriggersParseOnAccess(Assert $assert) : void
     {
         $f = new Flag('test');
         $f->onParse(() ==> {
             throw new \Exception('parsed');
         });
 
-        $this->expectCallable(() ==> {
+        $assert->whenCalled(() ==> {
             $f->occurances();
-        })->toThrow(\Exception::class, 'parsed');
+        })->willThrowClassWithMessage(\Exception::class, 'parsed');
     }
 }
