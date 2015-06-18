@@ -51,7 +51,7 @@ class OptionTest
         $assert->string($opt->firstValue())->is('one');
         $assert->string($opt->lastValue())->is('');
         foreach($opt->allValues() as $idx => $val) {
-            $assert->mixed($val)->identicalTo($vals->at($idx));
+            $assert->string($val)->is((string)$vals->at($idx));
         }
     }
 
