@@ -9,11 +9,12 @@
             "role": "Developer"
         }
     ],
+    "minimum-stability" : "dev",
     "require": {
         "hhvm": ">=3.5.0"
     },
     "require-dev": {
-        "hackpack/hackunit": "0.3.*"
+        "hackpack/hackunit": "dev-0.4-dev"
     },
     "autoload": {
         "psr-4": {
