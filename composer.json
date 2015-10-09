@@ -18,11 +18,12 @@
     },
     "autoload": {
         "psr-4": {
-            "kilahm\\Clio\\": "src/",
+            "kilahm\\Clio\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
             "kilahm\\Clio\\Test\\" : "test/"
-        },
-        "files": [
-            "src/Enum.php"
-        ]
+        }
     }
 }
